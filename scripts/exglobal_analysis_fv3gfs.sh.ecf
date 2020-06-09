@@ -1153,11 +1153,14 @@ if [ $SENDDBN = "YES" ]; then
     fi
 fi
 
+fi # NODA
+
 ################################################################################
 # Postprocessing
 cd $pwd
 [[ $mkdata = "YES" ]] && rm -rf $DATA
-fi
+
+cp $IPEGES $IPEANL
 
 set +x
 if [ $VERBOSE = "YES" ]; then
