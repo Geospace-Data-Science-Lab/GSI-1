@@ -68,19 +68,19 @@ NTHREADS_GSI=${NTHREADS_GSI:-${NTHREADS:-1}}
 
 # Surface cycle related parameters
 DOGCYCLE=${DOGCYCLE:-"NO"}
-CYCLESH=${CYCLESH:-$HOMEgfs/ush/global_cycle.sh}
-export CYCLEXEC=${CYCLEXEC:-$HOMEgfs/exec/global_cycle}
+CYCLESH=${CYCLESH:-$HOMEwfs/ush/global_cycle.sh}
+export CYCLEXEC=${CYCLEXEC:-$HOMEwfs/exec/global_cycle}
 NTHREADS_CYCLE=${NTHREADS_CYCLE:-24}
 APRUN_CYCLE=${APRUN_CYCLE:-${APRUN:-""}}
 export SNOW_NUDGE_COEFF=${SNOW_NUDGE_COEFF:-'-2.'}
 export CYCLVARS=${CYCLVARS:-""}
 export FHOUR=${FHOUR:-0}
 export DELTSFC=${DELTSFC:-6}
-export FIXgsm=${FIXgsm:-$HOMEgfs/fix/fix_am}
+export FIXgsm=${FIXwsm:-$HOMEwfs/fix/fix_am}
 
-DOGAUSFCANL=${DOGAUSFCANL-"YES"}
+DOGAUSFCANL=${DOGAUSFCANL-"NO"}
 GAUSFCANLSH=${GAUSFCANLSH:-$HOMEgfs/ush/gaussian_sfcanl.sh}
-export GAUSFCANLEXE=${GAUSFCANLEXE:-$HOMEgfs/exec/gaussian_sfcanl.exe}
+export GAUSFCANLEXE=${GAUSFCANLEXE:-$HOMEwfs/exec/gaussian_sfcanl.exe}
 NTHREADS_GAUSFCANL=${NTHREADS_GAUSFCANL:-1}
 APRUN_GAUSFCANL=${APRUN_GAUSFCANL:-${APRUN:-""}}
 
@@ -189,6 +189,8 @@ ATMGES=${ATMGES:-${COMIN_GES}/${GPREFIX}atmf06${GSUFFIX}}
 ATMG07=${ATMG07:-${COMIN_GES}/${GPREFIX}atmf07${GSUFFIX}}
 ATMG08=${ATMG08:-${COMIN_GES}/${GPREFIX}atmf08${GSUFFIX}}
 ATMG09=${ATMG09:-${COMIN_GES}/${GPREFIX}atmf09${GSUFFIX}}
+IPEG03=${IPEG03:-${COMIN_GES}/${GPREFIX}IPE_State.apex.${BDATE}00.h5}
+IPEGES=${IPEGES:-${COMIN_GES}/${GPREFIX}IPE_State.apex.${CDATE}00.h5}
 GBIAS=${GBIAS:-${COMIN_GES}/${GPREFIX}abias}
 GBIASPC=${GBIASPC:-${COMIN_GES}/${GPREFIX}abias_pc}
 GBIASAIR=${GBIASAIR:-${COMIN_GES}/${GPREFIX}abias_air}
@@ -198,6 +200,7 @@ GRADSTAT=${GRADSTAT:-${COMIN_GES}/${GPREFIX}radstat}
 APREFIX=${APREFIX:-""}
 ASUFFIX=${ASUFFIX:-""}
 SFCANL=${SFCANL:-${COMOUT}/${APREFIX}sfcanl${ASUFFIX}}
+SFCA03=${SFCA03:-${COMOUT}/${APREFIX}sfca03${ASUFFIX}}
 DTFANL=${DTFANL:-${COMOUT}/${APREFIX}dtfanl.nc}
 ATMANL=${ATMANL:-${COMOUT}/${APREFIX}atmanl${ASUFFIX}}
 ABIAS=${ABIAS:-${COMOUT}/${APREFIX}abias}
@@ -209,6 +212,8 @@ GSISTAT=${GSISTAT:-${COMOUT}/${APREFIX}gsistat}
 PCPSTAT=${PCPSTAT:-${COMOUT}/${APREFIX}pcpstat}
 CNVSTAT=${CNVSTAT:-${COMOUT}/${APREFIX}cnvstat}
 OZNSTAT=${OZNSTAT:-${COMOUT}/${APREFIX}oznstat}
+IPEA03=${IPEANL:-${COMOUT}/${APREFIX}IPE_State.apex.${BDATE}00.h5}
+IPEANL=${IPEANL:-${COMOUT}/${APREFIX}IPE_State.apex.${CDATE}00.h5}
 
 # Obs diag
 RUN_SELECT=${RUN_SELECT:-"NO"}
@@ -243,10 +248,10 @@ INCREMENTS_TO_ZERO=${INCREMENTS_TO_ZERO:-"'NONE'"}
 USE_CORRELATED_OBERRS=${USE_CORRELATED_OBERRS:-"YES"}
 
 # Get header information from Guess files
-LONB=${LONB:-$($SIGHDR $ATMGES lonb)}
-LATB=${LATB:-$($SIGHDR $ATMGES latb)}
+export LONB=${LONB:-$($SIGHDR $ATMGES lonb)}
+export LATB=${LATB:-$($SIGHDR $ATMGES latb)}
 LEVS=${LEVS:-$($SIGHDR $ATMGES levs)}
-JCAP=${JCAP:-$($SIGHDR $ATMGES jcap)}
+export JCAP=${JCAP:-$($SIGHDR $ATMGES jcap)}
 [ $JCAP -eq -9999 -a $LATB -ne -9999 ] && JCAP=$((LATB-2))
 [ $LONB -eq -9999 -o $LATB -eq -9999 -o $LEVS -eq -9999 -o $JCAP -eq -9999 ] && exit -9999
 
@@ -339,7 +344,18 @@ if [ $DOHYBVAR = "YES" -a $l4densvar = ".true." -a $lwrite4danl = ".true." ]; th
    ATMA08=${ATMA08:-${COMOUT}/${APREFIX}atma008${ASUFFIX}}
    ATMA09=${ATMA09:-${COMOUT}/${APREFIX}atma009${ASUFFIX}}
 fi
+if [ $NODA = "YES" ] ; then
+   cp $ATMGES $ATMANL
+   $CHGSIGFHREXEC $ATMANL $CDATE  0.00
 
+   if [ $DOIAU = "YES" ]; then
+      export SFCGES=${SFCG03}
+      export IPEGES=${IPEG03}
+      export SFCANL=${SFCA03}
+      export IPEANL=${IPEA03}
+   fi
+   cp $SFCGES $SFCANL
+else
 ################################################################################
 #  Preprocessing
 mkdata=NO
@@ -875,7 +891,7 @@ export ERR=$?
 export err=$ERR
 $ERRSCRIPT || exit 2
 
-# Update surface fields in the FV3 restart's using global_cycle
+# Update surface fields
 if [ $DOGCYCLE = "YES" ]; then
 
     # Global cycle requires these files
@@ -911,14 +927,8 @@ if [ $DOGCYCLE = "YES" ]; then
     fi
 
     if [ $DOIAU = "YES" ]; then
-        export APRUNCY=$APRUN_CYCLE
-        export OMP_NUM_THREADS_CY=$NTHREADS_CYCLE
-
-        $CYCLESH
-        rc=$?
-        export ERR=$rc
-        export err=$ERR
-        $ERRSCRIPT || exit 11
+        export SFCGES=${SFCG03}
+        export SFCANL=${COMOUT}/${APREFIX}sfca03${ASUFFIX}
     fi
 
     export APRUNCY=$APRUN_CYCLE
@@ -1147,6 +1157,7 @@ fi
 # Postprocessing
 cd $pwd
 [[ $mkdata = "YES" ]] && rm -rf $DATA
+fi
 
 set +x
 if [ $VERBOSE = "YES" ]; then

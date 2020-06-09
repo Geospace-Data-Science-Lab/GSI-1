@@ -79,16 +79,16 @@ export APREFIX="${CDUMP}.t${cyc}z."
 export ASUFFIX=""
 
 
-if [ $RUN_ENVIR = "nco" -o ${ROTDIR_DUMP:-NO} = "YES" ]; then
+#if [ $RUN_ENVIR = "nco" -o ${ROTDIR_DUMP:-NO} = "YES" ]; then
     export COMIN=${COMIN:-$ROTDIR/$RUN.$PDY/$cyc}
-    export COMOUT=${COMOUT:-$ROTDIR/$RUN.$PDY/$cyc}
-    export COMIN_OBS=${COMIN_OBS:-$ROTDIR/$RUN.$PDY/$cyc}
-    export COMIN_GES_OBS=${COMIN_GES_OBS:-$ROTDIR/$GDUMP.$gPDY/$gcyc}
-else
+#    export COMOUT=${COMOUT:-$ROTDIR/$RUN.$PDY/$cyc}
+#    export COMIN_OBS=${COMIN_OBS:-$ROTDIR/$RUN.$PDY/$cyc}
+#    export COMIN_GES_OBS=${COMIN_GES_OBS:-$ROTDIR/$GDUMP.$gPDY/$gcyc}
+#else
     export COMOUT="$ROTDIR/$CDUMP.$PDY/$cyc"
-    export COMIN_OBS="$DMPDIR/$CDATE/$CDUMP"
-    export COMIN_GES_OBS="$DMPDIR/$GDATE/$GDUMP"
-fi
+    export COMIN_OBS="$ROTDIR/$RUN.$PDY/$cyc"
+    export COMIN_GES_OBS="$ROTDIR/$GDUMP.$gPDY/$gcyc"
+#fi
 mkdir -m 775 -p $COMOUT
 # COMIN_GES and COMIN_GES_ENS are used in exglobal script
 # TO DO: Map NCO's directory into these variables
@@ -134,7 +134,7 @@ export DOGCYCLE=${DOGCYCLE:-"YES"}
 
 
 # Generate Gaussian surface analysis
-export DOGAUSFCANL=${DOGAUSFCANL:-"YES"}
+export DOGAUSFCANL=${DOGAUSFCANL:-"NO"}
 
 
 ###############################################################
