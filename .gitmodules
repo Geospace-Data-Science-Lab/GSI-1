@@ -1,7 +1,7 @@
 [submodule "fix"]
 	path = fix
-	url = gerrit:GSI-fix
+	url = ssh://vlab.ncep.noaa.gov:29418/GSI-fix
 
 [submodule "libsrc"]
 	path = libsrc
-	url = gerrit:GSI-libsrc
+	url = ssh://vlab.ncep.noaa.gov:29418/GSI-libsrc
