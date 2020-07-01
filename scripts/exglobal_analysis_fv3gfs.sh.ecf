@@ -344,16 +344,15 @@ if [ $DOHYBVAR = "YES" -a $l4densvar = ".true." -a $lwrite4danl = ".true." ]; th
    ATMA08=${ATMA08:-${COMOUT}/${APREFIX}atma008${ASUFFIX}}
    ATMA09=${ATMA09:-${COMOUT}/${APREFIX}atma009${ASUFFIX}}
 fi
+if [ $DOIAU = "YES" ]; then
+   export SFCGES=${SFCG03}
+   export IPEGES=${IPEG03}
+   export SFCANL=${SFCA03}
+   export IPEANL=${IPEA03}
+fi
 if [ $NODA = "YES" ] ; then
    cp $ATMGES $ATMANL
    $CHGSIGFHREXEC $ATMANL $CDATE  0.00
-
-   if [ $DOIAU = "YES" ]; then
-      export SFCGES=${SFCG03}
-      export IPEGES=${IPEG03}
-      export SFCANL=${SFCA03}
-      export IPEANL=${IPEA03}
-   fi
    cp $SFCGES $SFCANL
 else
 ################################################################################
@@ -1155,12 +1154,13 @@ fi
 
 fi # NODA
 
+cp $IPEGES $IPEANL
+
 ################################################################################
 # Postprocessing
 cd $pwd
 [[ $mkdata = "YES" ]] && rm -rf $DATA
 
-cp $IPEGES $IPEANL
 
 set +x
 if [ $VERBOSE = "YES" ]; then
