@@ -47,6 +47,7 @@ GDUMP=${GDUMP:-"gdas"}
 # Derived base variables
 GDATE=$($NDATE -$assim_freq $CDATE)
 BDATE=$($NDATE -3 $CDATE)
+FDATE=$($NDATE 3 $CDATE)
 PDY=$(echo $CDATE | cut -c1-8)
 cyc=$(echo $CDATE | cut -c9-10)
 bPDY=$(echo $BDATE | cut -c1-8)
@@ -190,6 +191,7 @@ ATMG07=${ATMG07:-${COMIN_GES}/${GPREFIX}atmf07${GSUFFIX}}
 ATMG08=${ATMG08:-${COMIN_GES}/${GPREFIX}atmf08${GSUFFIX}}
 ATMG09=${ATMG09:-${COMIN_GES}/${GPREFIX}atmf09${GSUFFIX}}
 IPEG03=${IPEG03:-${COMIN_GES}/${GPREFIX}IPE_State.apex.${BDATE}00.h5}
+IPEF03=${IPEF03:-${COMIN_GES}/${GPREFIX}IPE_State.apex.${FDATE}00.h5}
 IPEGES=${IPEGES:-${COMIN_GES}/${GPREFIX}IPE_State.apex.${CDATE}00.h5}
 GBIAS=${GBIAS:-${COMIN_GES}/${GPREFIX}abias}
 GBIASPC=${GBIASPC:-${COMIN_GES}/${GPREFIX}abias_pc}
@@ -214,6 +216,7 @@ CNVSTAT=${CNVSTAT:-${COMOUT}/${APREFIX}cnvstat}
 OZNSTAT=${OZNSTAT:-${COMOUT}/${APREFIX}oznstat}
 IPEA03=${IPEANL:-${COMOUT}/${APREFIX}IPE_State.apex.${BDATE}00.h5}
 IPEANL=${IPEANL:-${COMOUT}/${APREFIX}IPE_State.apex.${CDATE}00.h5}
+IPEB03=${IPEB03:-${COMOUT}/${APREFIX}IPE_State.apex.${FDATE}00.h5}
 
 # Obs diag
 RUN_SELECT=${RUN_SELECT:-"NO"}
@@ -345,16 +348,27 @@ if [ $DOHYBVAR = "YES" -a $l4densvar = ".true." -a $lwrite4danl = ".true." ]; th
    ATMA09=${ATMA09:-${COMOUT}/${APREFIX}atma009${ASUFFIX}}
 fi
 if [ $NODA = "YES" ] ; then
-   cp $ATMGES $ATMANL
-   $CHGSIGFHREXEC $ATMANL $CDATE  0.00
+   if [ $CDUMP = "wfr" ] ; then
+      ATMGES=$ATMG03
+      SFCGES=$SFCG03
+      cp $ATMGES $ATMANL
+      cp $SFCGES $SFCANL
+      $CHGSIGFHREXEC $ATMANL $FDATE 0.00
+      $CHGSFCFHREXEC $SFCANL $FDATE 0.00
+      IPEGES=${IPEF03}
+      IPEANL=${IPEB03}
+   else
+      cp $ATMGES $ATMANL
+      $CHGSIGFHREXEC $ATMANL $CDATE  0.00
 
-   if [ $DOIAU = "YES" ]; then
-      export SFCGES=${SFCG03}
-      export IPEGES=${IPEG03}
-      export SFCANL=${SFCA03}
-      export IPEANL=${IPEA03}
+      if [ $DOIAU = "YES" ]; then
+         export SFCGES=${SFCG03}
+         export SFCANL=${SFCA03}
+         IPEGES=${IPEG03}
+         IPEANL=${IPEA03}
+      fi
+      cp $SFCGES $SFCANL
    fi
-   cp $SFCGES $SFCANL
 else
 ################################################################################
 #  Preprocessing
