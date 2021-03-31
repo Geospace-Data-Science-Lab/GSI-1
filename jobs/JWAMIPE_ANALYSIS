@@ -6,36 +6,24 @@ export PS4='$SECONDS + '
 date
 
 
-#############################
-# Source relevant config files
-#############################
-export EXPDIR=${EXPDIR:-$HOMEwfs/parm/config}
-configs="base anal"
-config_path=${EXPDIR:-$NWROOT/gfs.${gfs_ver}/parm/config}
-for config in $configs; do
-    . $config_path/config.$config
-    status=$?
-    [[ $status -ne 0 ]] && exit $status
-done
-
-
-##########################################
-# Source machine runtime environment
-##########################################
-. $HOMEwfs/env/${machine}.env anal
-status=$?
-[[ $status -ne 0 ]] && exit $status
-
-
 ##############################################
 # Obtain unique process id (pid) and make temp directory
 ##############################################
 export pid=${pid:-$$}
 export outid=${outid:-"LL$job"}
-
 export DATA=${DATA:-${DATAROOT}/${jobid:?}}
 mkdir -p $DATA
 cd $DATA
+
+
+##############################################
+# Set com directory
+##############################################
+export CDATE=${CDATE:-${PDY}${cyc}}
+export CDUMP=${CDUMP:-${RUN:-"wfs"}}
+if [ $RUN_ENVIR = "nco" ]; then
+    export ROTDIR=${COMROOT:?}/$NET/$envir
+fi
 
 
 ##############################################
@@ -53,14 +41,27 @@ export pgmout="OUTPUT.${pid}"
 export pgmerr=errfile
 
 
-##############################################
-# Set variables used in the exglobal script
-##############################################
-export CDATE=${CDATE:-${PDY}${cyc}}
-export CDUMP=${CDUMP:-${RUN:-"wfs"}}
-if [ $RUN_ENVIR = "nco" ]; then
-    export ROTDIR=${COMROOT:?}/$NET/$envir
-fi
+#############################
+# Source relevant config files
+#############################
+configs="base anal"
+export EXPDIR=${EXPDIR:-$HOMEwamipe/parm/config}
+config_path=${EXPDIR:-$NWROOT/gfs.${gfs_ver}/parm/config}
+for config in $configs; do
+    . $config_path/config.$config
+    status=$?
+    [[ $status -ne 0 ]] && exit $status
+done
+
+while read line; do export $line ; done < <($HOMEwamipe/ush/create_config.py \
+                                            -d $PARMDIR/default_config.json -p $DCOM)
+
+##########################################
+# Source machine runtime environment
+##########################################
+. $HOMEwamipe/env/${machine}.env anal
+status=$?
+[[ $status -ne 0 ]] && exit $status
 
 
 ##############################################

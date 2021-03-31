@@ -1232,7 +1232,11 @@ fi
 
 fi # NODA
 
-cp $IPEGES $IPEANL
+if [ $ipe_coldstart = "T" -a $CDUMP = "wdas" ]; then
+    cp $IPE_IC_DIR/IPE_State.coldstart.$bcyc.h5 $IPEANL
+else
+    cp $IPEGES $IPEANL
+fi
 
 ################################################################################
 # Postprocessing
