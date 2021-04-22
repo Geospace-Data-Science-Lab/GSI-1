@@ -7,13 +7,11 @@ date
 
 
 ##############################################
-# Obtain unique process id (pid) and make temp directory
+# Run setpdy and initialize PDY variables
 ##############################################
-export pid=${pid:-$$}
-export outid=${outid:-"LL$job"}
-export DATA=${DATA:-${DATAROOT}/${jobid:?}}
-mkdir -p $DATA
-cd $DATA
+export cycle="t${cyc}z"
+setpdy.sh
+. ./PDY
 
 
 ##############################################
@@ -24,21 +22,6 @@ export CDUMP=${CDUMP:-${RUN:-"wfs"}}
 if [ $RUN_ENVIR = "nco" ]; then
     export ROTDIR=${COMROOT:?}/$NET/$envir
 fi
-
-
-##############################################
-# Run setpdy and initialize PDY variables
-##############################################
-export cycle="t${cyc}z"
-setpdy.sh
-. ./PDY
-
-
-##############################################
-# Determine Job Output Name on System
-##############################################
-export pgmout="OUTPUT.${pid}"
-export pgmerr=errfile
 
 
 #############################
@@ -60,6 +43,23 @@ while read line; do export $line ; done < <($HOMEwamipe/ush/create_config.py \
 ##########################################
 . $HOMEwamipe/env/${machine}.env anal
 export err=$? ; err_chk "GSI analysis or sfc analysis failure"
+
+
+##############################################
+# Obtain unique process id (pid) and make temp directory
+##############################################
+export pid=${pid:-$$}
+export outid=${outid:-"LL$job"}
+export DATA=${DATA:-${DATAROOT}/${jobid:?}}
+mkdir -p $DATA
+cd $DATA
+
+
+##############################################
+# Determine Job Output Name on System
+##############################################
+export pgmout="OUTPUT.${pid}"
+export pgmerr=errfile
 
 
 ##############################################
@@ -97,10 +97,12 @@ export COMIN_GES="$ROTDIR/$GDUMP.$gPDY/$gcyc"
 export COMIN_GES_ENS="$ROTDIR/enkfgdas.$gPDY/$gcyc"
 
 
-export ATMGES="$COMIN_GES/${GPREFIX}atmf06${GSUFFIX}"
+ATMGES="$COMIN_GES/${GPREFIX}atmf06${GSUFFIX}"
+[[ $CDUMP = "wfr" ]] && ATMGES="$COMIN_GES/${GPREFIX}atmf03${GSUFFIX}"
+export ATMGES
 if [ ! -f $ATMGES ]; then
     echo "FATAL ERROR: FILE MISSING: ATMGES = $ATMGES"
-    exit 1
+    export err=1 ; err_exit
 fi
 
 
@@ -112,7 +114,7 @@ if [ $DOHYBVAR = "YES" ]; then
     export ATMGES_ENSMEAN="$COMIN_GES_ENS/${GPREFIX}atmf006.ensmean$GSUFFIX"
     if [ ! -f $ATMGES_ENSMEAN ]; then
         echo "FATAL ERROR: FILE MISSING: ATMGES_ENSMEAN = $ATMGES_ENSMEAN"
-        exit 2
+        export err=2 ; err_exit
     fi
 fi
 

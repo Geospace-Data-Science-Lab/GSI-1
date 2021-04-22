@@ -69,19 +69,19 @@ NTHREADS_GSI=${NTHREADS_GSI:-${NTHREADS:-1}}
 
 # Surface cycle related parameters
 DOGCYCLE=${DOGCYCLE:-"NO"}
-CYCLESH=${CYCLESH:-$HOMEwfs/ush/global_cycle.sh}
-export CYCLEXEC=${CYCLEXEC:-$HOMEwfs/exec/global_cycle}
+CYCLESH=${CYCLESH:-$HOMEwamipe/ush/global_cycle.sh}
+export CYCLEXEC=${CYCLEXEC:-$HOMEwamipe/exec/global_cycle}
 NTHREADS_CYCLE=${NTHREADS_CYCLE:-24}
 APRUN_CYCLE=${APRUN_CYCLE:-${APRUN:-""}}
 export SNOW_NUDGE_COEFF=${SNOW_NUDGE_COEFF:-'-2.'}
 export CYCLVARS=${CYCLVARS:-""}
 export FHOUR=${FHOUR:-0}
 export DELTSFC=${DELTSFC:-6}
-export FIXgsm=${FIXwsm:-$HOMEwfs/fix/fix_am}
+export FIXgsm=${FIXwsm:-$HOMEwamipe/fix/fix_am}
 
 DOGAUSFCANL=${DOGAUSFCANL-"NO"}
 GAUSFCANLSH=${GAUSFCANLSH:-$HOMEgfs/ush/gaussian_sfcanl.sh}
-export GAUSFCANLEXE=${GAUSFCANLEXE:-$HOMEwfs/exec/gaussian_sfcanl.exe}
+export GAUSFCANLEXE=${GAUSFCANLEXE:-$HOMEwamipe/exec/gaussian_sfcanl.exe}
 NTHREADS_GAUSFCANL=${NTHREADS_GAUSFCANL:-1}
 APRUN_GAUSFCANL=${APRUN_GAUSFCANL:-${APRUN:-""}}
 
@@ -356,6 +356,7 @@ if [ $DOIAU = "YES" ]; then
 fi
 if [ $NODA = "YES" ] ; then
    if [ $CDUMP = "wfr" ] ; then
+      DOGCYCLE="NO"
       ATMGES=$ATMG03
       SFCGES=$SFCG03
       cp $ATMGES $ATMANL
